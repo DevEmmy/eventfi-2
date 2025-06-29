@@ -2,83 +2,17 @@
 import React, { useRef } from "react";
 import { Location, Calendar, Clock, People, Star, Heart, Share, ArrowLeft, ArrowRight } from "iconsax-react";
 import { FaFire } from "react-icons/fa";
+import { useRouter } from 'next/navigation';
+import { events } from '@/data/events';
 
-const upcomingEvents = [
-  {
-    name: "Crypto Art Gallery Opening",
-    category: "Art",
-    distance: "0.3 miles away",
-    date: "Dec 12, 2024",
-    time: "6:00 PM",
-    location: "Downtown Gallery, SF",
-    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=400&q=80",
-    attendees: 85,
-    rating: 4.9,
-    price: 0,
-    isFree: true,
-  },
-  {
-    name: "Blockchain Networking Mixer",
-    category: "Technology",
-    distance: "1.1 miles away",
-    date: "Dec 13, 2024",
-    time: "7:30 PM",
-    location: "Tech Hub, SF",
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=400&q=80",
-    attendees: 120,
-    rating: 4.7,
-    price: 15,
-  },
-  {
-    name: "NFT Music Festival",
-    category: "Music",
-    distance: "2.0 miles away",
-    date: "Dec 14, 2024",
-    time: "5:00 PM",
-    location: "Music Hall, SF",
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=400&q=80",
-    attendees: 300,
-    rating: 4.8,
-    price: 35,
-  },
-  {
-    name: "DeFi Workshop",
-    category: "Technology",
-    distance: "0.8 miles away",
-    date: "Dec 16, 2024",
-    time: "2:00 PM",
-    location: "Innovation Center, SF",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80",
-    attendees: 45,
-    rating: 4.6,
-    price: 25,
-  },
-  {
-    name: "Gaming LAN Party",
-    category: "Gaming",
-    distance: "1.5 miles away",
-    date: "Dec 17, 2024",
-    time: "4:00 PM",
-    location: "Gaming Arena, SF",
-    image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80",
-    attendees: 180,
-    rating: 4.5,
-    price: 20,
-  },
-  {
-    name: "Web3 Startup Pitch Night",
-    category: "Technology",
-    distance: "0.6 miles away",
-    date: "Dec 19, 2024",
-    time: "6:30 PM",
-    location: "Venture Studio, SF",
-    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=400&q=80",
-    attendees: 75,
-    rating: 4.9,
-    price: 0,
-    isFree: true,
-  },
-];
+// Filter upcoming events (events happening soon)
+const upcomingEvents = events.filter(event => {
+  const eventDate = new Date(event.date);
+  const today = new Date();
+  const diffTime = eventDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays >= 0 && diffDays <= 30; // Events happening within 30 days
+});
 
 const categoryColors = {
   Technology: "border-[#845EC2] text-[#845EC2] bg-white/10",
@@ -89,6 +23,7 @@ const categoryColors = {
 
 const UpcomingEventsSection = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const scroll = (dir: 'left' | 'right') => {
     if (!scrollRef.current) return;
@@ -98,6 +33,10 @@ const UpcomingEventsSection = () => {
       left: dir === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
       behavior: 'smooth',
     });
+  };
+
+  const handleEventClick = (eventId: string) => {
+    router.push(`/event/${eventId}`);
   };
 
   return (
@@ -113,14 +52,16 @@ const UpcomingEventsSection = () => {
         >
           <ArrowLeft color="#ffffff" size={22} />
         </button>
+        
         <div
           ref={scrollRef}
           className="flex gap-6 overflow-x-auto no-scrollbar scrollbar-thin scrollbar-thumb-[#FF6F91]/40 scrollbar-track-transparent py-4 px-2 md:px-8 snap-x snap-mandatory"
         >
           {upcomingEvents.map((event, i) => (
             <div
-              key={i}
-              className="relative rounded-2xl overflow-hidden flex flex-col bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl border border-white/20 shadow-xl min-w-[300px] max-w-[300px] snap-center transition-all duration-300 hover:border-[#FF6F91] hover:shadow-2xl hover:scale-105"
+              key={event.id}
+              className="relative rounded-2xl overflow-hidden flex flex-col bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl border border-white/20 shadow-xl min-w-[300px] max-w-[300px] snap-center transition-all duration-300 hover:border-[#FF6F91] hover:shadow-2xl hover:scale-105 cursor-pointer"
+              onClick={() => handleEventClick(event.id)}
             >
               {/* Urgency badge */}
               <div className="absolute top-4 left-4 z-20">
@@ -139,7 +80,13 @@ const UpcomingEventsSection = () => {
                 <img src={event.image} alt={event.name} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#181824cc] to-transparent" />
                 <div className="absolute bottom-2 right-2 flex gap-2 z-10">
-                  <button className="bg-black/40 hover:bg-[#FF6F91]/80 text-white p-2 rounded-full transition-colors">
+                  <button 
+                    className="bg-black/40 hover:bg-[#FF6F91]/80 text-white p-2 rounded-full transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Handle like functionality
+                    }}
+                  >
                     <Heart color="#ffffff" size={14} />
                   </button>
                 </div>
@@ -176,7 +123,13 @@ const UpcomingEventsSection = () => {
                   </div>
                 </div>
                 {/* Action button */}
-                <button className="mt-4 w-full py-2.5 rounded-xl border-2 border-[#FF6F91] bg-[#FF6F91]/10 text-[#FF6F91] font-bold text-sm shadow hover:bg-[#FF6F91] hover:text-white transition-all">
+                <button 
+                  className="mt-4 w-full py-2.5 rounded-xl border-2 border-[#FF6F91] bg-[#FF6F91]/10 text-[#FF6F91] font-bold text-sm shadow hover:bg-[#FF6F91] hover:text-white transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEventClick(event.id);
+                  }}
+                >
                   {event.isFree ? 'RSVP Free' : 'Get Tickets'}
                 </button>
               </div>

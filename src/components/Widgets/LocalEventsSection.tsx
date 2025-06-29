@@ -1,108 +1,14 @@
 "use client";
 import React, { useRef } from "react";
 import { Location, Calendar, Clock, People, Star, Heart, Share, ArrowLeft, ArrowRight, Map } from "iconsax-react";
+import { useRouter } from 'next/navigation';
+import { events } from '@/data/events';
 
-const localEvents = [
-  {
-    name: "Crypto Coffee Meetup",
-    category: "Networking",
-    distance: "0.2 miles away",
-    date: "Dec 13, 2024",
-    time: "9:00 AM",
-    location: "Blue Bottle Coffee, SF",
-    image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=400&q=80",
-    attendees: 25,
-    rating: 4.6,
-    price: 0,
-    isFree: true,
-  },
-  {
-    name: "Blockchain Book Club",
-    category: "Education",
-    distance: "0.5 miles away",
-    date: "Dec 14, 2024",
-    time: "6:00 PM",
-    location: "Public Library, SF",
-    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=400&q=80",
-    attendees: 18,
-    rating: 4.7,
-    price: 0,
-    isFree: true,
-  },
-  {
-    name: "NFT Photography Walk",
-    category: "Art",
-    distance: "0.8 miles away",
-    date: "Dec 16, 2024",
-    time: "4:00 PM",
-    location: "Golden Gate Park, SF",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80",
-    attendees: 35,
-    rating: 4.8,
-    price: 15,
-  },
-  {
-    name: "DeFi Happy Hour",
-    category: "Social",
-    distance: "0.3 miles away",
-    date: "Dec 17, 2024",
-    time: "5:30 PM",
-    location: "Crypto Bar, SF",
-    image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=400&q=80",
-    attendees: 42,
-    rating: 4.5,
-    price: 20,
-  },
-  {
-    name: "Web3 Yoga Session",
-    category: "Wellness",
-    distance: "0.6 miles away",
-    date: "Dec 19, 2024",
-    time: "7:00 AM",
-    location: "Zen Studio, SF",
-    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=400&q=80",
-    attendees: 15,
-    rating: 4.9,
-    price: 25,
-  },
-  {
-    name: "Crypto Trivia Night",
-    category: "Entertainment",
-    distance: "0.4 miles away",
-    date: "Dec 21, 2024",
-    time: "8:00 PM",
-    location: "Local Pub, SF",
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=400&q=80",
-    attendees: 28,
-    rating: 4.4,
-    price: 10,
-  },
-  {
-    name: "Blockchain Meditation",
-    category: "Wellness",
-    distance: "0.7 miles away",
-    date: "Dec 23, 2024",
-    time: "6:30 PM",
-    location: "Mindfulness Center, SF",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80",
-    attendees: 12,
-    rating: 4.8,
-    price: 18,
-  },
-  {
-    name: "Crypto Potluck Dinner",
-    category: "Social",
-    distance: "0.9 miles away",
-    date: "Dec 26, 2024",
-    time: "7:00 PM",
-    location: "Community Kitchen, SF",
-    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80",
-    attendees: 30,
-    rating: 4.6,
-    price: 0,
-    isFree: true,
-  },
-];
+// Filter local events (events within 1 mile)
+const localEvents = events.filter(event => {
+  const distance = parseFloat(event.distance.split(' ')[0]);
+  return distance <= 1.0;
+});
 
 const categoryColors = {
   Networking: "border-[#845EC2] text-[#845EC2] bg-white/10",
@@ -115,6 +21,7 @@ const categoryColors = {
 
 const LocalEventsSection = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const scroll = (dir: 'left' | 'right') => {
     if (!scrollRef.current) return;
@@ -124,6 +31,10 @@ const LocalEventsSection = () => {
       left: dir === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
       behavior: 'smooth',
     });
+  };
+
+  const handleEventClick = (eventId: string) => {
+    router.push(`/event/${eventId}`);
   };
 
   return (
@@ -148,8 +59,9 @@ const LocalEventsSection = () => {
         >
           {localEvents.map((event, i) => (
             <div
-              key={i}
-              className="relative rounded-xl overflow-hidden flex flex-col bg-gradient-to-br from-[#0081CF]/10 to-transparent backdrop-blur-xl border border-[#0081CF]/30 shadow-lg min-w-[280px] max-w-[280px] snap-center transition-all duration-300 hover:border-[#0081CF] hover:shadow-xl hover:scale-105"
+              key={event.id}
+              className="relative rounded-xl overflow-hidden flex flex-col bg-gradient-to-br from-[#0081CF]/10 to-transparent backdrop-blur-xl border border-[#0081CF]/30 shadow-lg min-w-[280px] max-w-[280px] snap-center transition-all duration-300 hover:border-[#0081CF] hover:shadow-xl hover:scale-105 cursor-pointer"
+              onClick={() => handleEventClick(event.id)}
             >
               {/* Distance badge */}
               <div className="absolute top-3 left-3 z-20">
@@ -176,7 +88,13 @@ const LocalEventsSection = () => {
                 <img src={event.image} alt={event.name} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#181824cc] to-transparent" />
                 <div className="absolute bottom-2 right-2 z-10">
-                  <button className="bg-black/40 hover:bg-[#0081CF]/80 text-white p-1.5 rounded-full transition-colors">
+                  <button 
+                    className="bg-black/40 hover:bg-[#0081CF]/80 text-white p-1.5 rounded-full transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Handle like functionality
+                    }}
+                  >
                     <Heart color="#ffffff" size={12} />
                   </button>
                 </div>
@@ -213,7 +131,13 @@ const LocalEventsSection = () => {
                   </div>
                 </div>
                 {/* Action button */}
-                <button className="mt-3 w-full py-2 rounded-lg border border-[#0081CF] bg-[#0081CF]/10 text-[#0081CF] font-bold text-sm shadow hover:bg-[#0081CF] hover:text-white transition-all">
+                <button 
+                  className="mt-3 w-full py-2 rounded-lg border border-[#0081CF] bg-[#0081CF]/10 text-[#0081CF] font-bold text-sm shadow hover:bg-[#0081CF] hover:text-white transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEventClick(event.id);
+                  }}
+                >
                   {event.isFree ? 'RSVP' : 'Get Tickets'}
                 </button>
               </div>

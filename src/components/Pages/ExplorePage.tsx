@@ -3,94 +3,8 @@ import React, { useState, useEffect } from 'react'
 import NavBar from '../Widgets/NavBar'
 import Footer from '../Widgets/Footer'
 import { Location, Calendar, Clock, People, Star, Heart, Share } from "iconsax-react";
-
-// Mock data for events
-const mockEvents = [
-  {
-    id: 1,
-    name: "Tech Conference 2024",
-    category: "Technology",
-    distance: "0.5 miles away",
-    date: "Mar 15, 2024",
-    time: "09:00 AM",
-    location: "San Francisco, CA",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop",
-    attendees: 320,
-    rating: 4.8,
-    price: 299,
-    description: "Join us for the biggest tech conference of the year featuring industry leaders and cutting-edge innovations."
-  },
-  {
-    id: 2,
-    name: "Jazz Night Under the Stars",
-    category: "Music",
-    distance: "1.2 miles away",
-    date: "Mar 20, 2024",
-    time: "07:00 PM",
-    location: "Central Park, NY",
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=250&fit=crop",
-    attendees: 89,
-    rating: 4.9,
-    price: 0,
-    description: "An evening of smooth jazz music in the heart of the city."
-  },
-  {
-    id: 3,
-    name: "Startup Networking Mixer",
-    category: "Business",
-    distance: "2.1 miles away",
-    date: "Mar 25, 2024",
-    time: "06:30 PM",
-    location: "Downtown Business Center",
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=250&fit=crop",
-    attendees: 156,
-    rating: 4.7,
-    price: 50,
-    description: "Connect with fellow entrepreneurs and investors in a relaxed networking environment."
-  },
-  {
-    id: 4,
-    name: "Art Exhibition Opening",
-    category: "Art",
-    distance: "0.8 miles away",
-    date: "Mar 28, 2024",
-    time: "05:00 PM",
-    location: "Modern Art Gallery",
-    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=250&fit=crop",
-    attendees: 210,
-    rating: 4.8,
-    price: 25,
-    description: "Discover emerging artists and their latest works in this exclusive exhibition."
-  },
-  {
-    id: 5,
-    name: "Food & Wine Festival",
-    category: "Food & Drink",
-    distance: "3.5 miles away",
-    date: "Apr 05, 2024",
-    time: "12:00 PM",
-    location: "City Square",
-    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=250&fit=crop",
-    attendees: 450,
-    rating: 4.9,
-    price: 75,
-    description: "Taste the finest local and international cuisine paired with exceptional wines."
-  },
-  {
-    id: 6,
-    name: "Yoga Retreat Weekend",
-    category: "Health & Wellness",
-    distance: "4.2 miles away",
-    date: "Apr 12, 2024",
-    time: "08:00 AM",
-    location: "Mountain Resort",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop",
-    attendees: 120,
-    rating: 4.6,
-    price: 199,
-    description: "Reconnect with yourself through yoga, meditation, and nature."
-  }
-]
+import { useRouter } from 'next/navigation';
+import { events, searchEvents, getEventsByCategory } from '@/data/events';
 
 const categories = [
   "All",
@@ -120,6 +34,7 @@ const ExplorePage = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [sortBy, setSortBy] = useState('date')
+  const router = useRouter()
 
   // Handle URL search parameters
   useEffect(() => {
@@ -132,13 +47,15 @@ const ExplorePage = () => {
     }
   }, [])
 
-  const filteredEvents = mockEvents.filter(event => {
-    const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.location.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+  // Get filtered events based on search and category
+  let filteredEvents = searchTerm 
+    ? searchEvents(searchTerm)
+    : getEventsByCategory(selectedCategory)
+
+  // Apply category filter if not searching
+  if (!searchTerm && selectedCategory !== 'All') {
+    filteredEvents = filteredEvents.filter(event => event.category === selectedCategory)
+  }
 
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     switch (sortBy) {
@@ -152,6 +69,10 @@ const ExplorePage = () => {
         return 0
     }
   })
+
+  const handleEventClick = (eventId: string) => {
+    router.push(`/event/${eventId}`);
+  };
 
   return (
     <div className='text-white/90 min-h-screen'>
@@ -253,7 +174,8 @@ const ExplorePage = () => {
                 {sortedEvents.map(event => (
                   <div
                     key={event.id}
-                    className="relative rounded-3xl overflow-hidden flex flex-col bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl transition-all duration-300 hover:border-[#845EC2] hover:shadow-2xl"
+                    className="relative rounded-3xl overflow-hidden flex flex-col bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl transition-all duration-300 hover:border-[#845EC2] hover:shadow-2xl cursor-pointer"
+                    onClick={() => handleEventClick(event.id)}
                   >
                     {/* Top badges */}
                     <div className="absolute top-4 left-4 flex gap-2 z-20">
@@ -273,10 +195,22 @@ const ExplorePage = () => {
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute bottom-2 right-4 flex gap-2 z-10">
-                        <button className="bg-black/40 hover:bg-[#845EC2]/80 text-white p-2 rounded-full">
+                        <button 
+                          className="bg-black/40 hover:bg-[#845EC2]/80 text-white p-2 rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Handle like functionality
+                          }}
+                        >
                           <Heart color="#ffffff" size={16} />
                         </button>
-                        <button className="bg-black/40 hover:bg-[#845EC2]/80 text-white p-2 rounded-full">
+                        <button 
+                          className="bg-black/40 hover:bg-[#845EC2]/80 text-white p-2 rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Handle share functionality
+                          }}
+                        >
                           <Share color="#ffffff" size={16} />
                         </button>
                       </div>
@@ -308,13 +242,19 @@ const ExplorePage = () => {
                           </span>
                         </div>
                         <div className="text-xl font-extrabold text-[#D65DB1]">
-                          {event.price === 0 ? 'Free' : `$${event.price}`}
+                          {event.isFree ? 'Free' : `$${event.price}`}
                         </div>
                       </div>
                       
                       {/* Action button */}
-                      <button className="mt-6 w-full py-3 rounded-xl border-2 border-[#845EC2] bg-white/10 text-[#845EC2] font-bold text-lg shadow hover:bg-[#845EC2] hover:text-white transition-all">
-                        Get Tickets
+                      <button 
+                        className="mt-6 w-full py-3 rounded-xl border-2 border-[#845EC2] bg-white/10 text-[#845EC2] font-bold text-lg shadow hover:bg-[#845EC2] hover:text-white transition-all"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEventClick(event.id);
+                        }}
+                      >
+                        {event.isFree ? 'RSVP Free' : 'Get Tickets'}
                       </button>
                     </div>
                   </div>

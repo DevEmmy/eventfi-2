@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import NavBar from '../Widgets/NavBar'
 import Footer from '../Widgets/Footer'
 import { 
@@ -27,12 +27,13 @@ interface EventDetailPageProps {
   eventId: string
 }
 
-const EventDetailPage: React.FC<EventDetailPageProps> = ({ eventId }) => {
+const EventDetailPage = () => {
   const router = useRouter()
   const [selectedTicketType, setSelectedTicketType] = useState<string>('')
   const [isLiked, setIsLiked] = useState(false)
   
-  const event = getEventById(eventId)
+  const { id: eventId } = useParams()
+  const event = getEventById(eventId as string)
   
   if (!event) {
     return (

@@ -2,10 +2,10 @@ import EventDetailPage from "@/components/Pages/EventDetailPage";
 
 import React from 'react'
 
-const page = ({ params }: { params: { id: string } }) => {
-  const { id } = params;
+const page = () => {
+  
   return (
-    <EventDetailPage eventId={id} />
+    <EventDetailPage />
   )
 }
 

@@ -86,7 +86,7 @@ const ExplorePage = () => {
         <div
           className="w-full h-screen rounded-full opacity-30 blur-3xl"
           style={{
-            background: 'radial-gradient(ellipse at center, #fff 0%, #fff0 70%)',
+            background: 'radial-gradient(ellipse at center,rgb(169, 129, 233) 0%,rgb(50, 30, 82) 70%)',
           }}
         />
       </div>

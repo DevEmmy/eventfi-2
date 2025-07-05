@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { events } from '@/data/events';
 
 // Filter free events
-const freeEvents = events.filter(event => event.isFree);
+const freeEvents = events;
 
 const categoryColors = {
   Education: "border-[#00C9A7] text-[#00C9A7] bg-white/10",

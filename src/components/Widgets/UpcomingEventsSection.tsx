@@ -6,13 +6,7 @@ import { useRouter } from 'next/navigation';
 import { events } from '@/data/events';
 
 // Filter upcoming events (events happening soon)
-const upcomingEvents = events.filter(event => {
-  const eventDate = new Date(event.date);
-  const today = new Date();
-  const diffTime = eventDate.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays >= 0 && diffDays <= 30; // Events happening within 30 days
-});
+const upcomingEvents = events
 
 const categoryColors = {
   Technology: "border-[#845EC2] text-[#845EC2] bg-white/10",

@@ -1,0 +1,157 @@
+{
+  "version": "0.1.0",
+  "name": "eventfi_profile",
+  "instructions": [
+    {
+      "name": "initializeProfile",
+      "accounts": [
+        { "name": "profile", "isMut": true, "isSigner": false },
+        { "name": "user", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "userType", "type": { "defined": "UserType" } }]
+    },
+    {
+      "name": "updateUserType",
+      "accounts": [
+        { "name": "profile", "isMut": true, "isSigner": false },
+        { "name": "user", "isMut": false, "isSigner": true }
+      ],
+      "args": [{ "name": "userType", "type": { "defined": "UserType" } }]
+    },
+    {
+      "name": "verifyProfile",
+      "accounts": [
+        { "name": "profile", "isMut": true, "isSigner": false },
+        { "name": "adminProfile", "isMut": false, "isSigner": false },
+        { "name": "user", "isMut": false, "isSigner": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "createEvent",
+      "accounts": [
+        { "name": "event", "isMut": true, "isSigner": false },
+        { "name": "organizerProfile", "isMut": true, "isSigner": false },
+        { "name": "user", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "title", "type": "string" },
+        { "name": "description", "type": "string" },
+        { "name": "location", "type": "string" },
+        { "name": "startTime", "type": "i64" },
+        { "name": "endTime", "type": "i64" }
+      ]
+    },
+    {
+      "name": "buyTicket",
+      "accounts": [
+        { "name": "ticket", "isMut": true, "isSigner": false },
+        { "name": "event", "isMut": false, "isSigner": false },
+        { "name": "user", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "ticketSeed", "type": "u64" },
+        { "name": "ticketType", "type": "u8" }
+      ]
+    },
+    {
+      "name": "mintTicketNft",
+      "accounts": [
+        { "name": "ticket", "isMut": true, "isSigner": false },
+        { "name": "event", "isMut": false, "isSigner": false },
+        { "name": "mint", "isMut": true, "isSigner": true },
+        { "name": "tokenAccount", "isMut": true, "isSigner": false },
+        { "name": "metadata", "isMut": true, "isSigner": false },
+        { "name": "masterEdition", "isMut": true, "isSigner": false },
+        { "name": "payer", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "rent", "isMut": false, "isSigner": false },
+        { "name": "tokenMetadataProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "uri", "type": "string" }]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Ticket",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "event", "type": "publicKey" },
+          { "name": "owner", "type": "publicKey" },
+          { "name": "ticketType", "type": "u8" },
+          { "name": "isUsed", "type": "bool" },
+          { "name": "minted", "type": "bool" },
+          { "name": "createdAt", "type": "i64" }
+        ]
+      }
+    },
+    {
+      "name": "UserProfile",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "wallet", "type": "publicKey" },
+          { "name": "userType", "type": { "defined": "UserType" } },
+          { "name": "verified", "type": "bool" },
+          { "name": "createdAt", "type": "i64" }
+        ]
+      }
+    },
+    {
+      "name": "Event",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "organizer", "type": "publicKey" },
+          { "name": "title", "type": "string" },
+          { "name": "description", "type": "string" },
+          { "name": "location", "type": "string" },
+          { "name": "startTime", "type": "i64" },
+          { "name": "endTime", "type": "i64" },
+          { "name": "createdAt", "type": "i64" },
+          { "name": "updatedAt", "type": "i64" },
+          { "name": "isLive", "type": "bool" }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "UserType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          { "name": "Attendee" },
+          { "name": "Organizer" },
+          { "name": "Admin" }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "NotOrganizer",
+      "msg": "Only organizers can create events."
+    },
+    {
+      "code": 6001,
+      "name": "TicketAlreadyMinted",
+      "msg": "This ticket has already been minted as an NFT."
+    },
+    {
+      "code": 6002,
+      "name": "NotTicketOwner",
+      "msg": "Only the ticket owner can mint it as an NFT."
+    }
+  ],
+  "metadata": {
+    "address": "2xaoCPoYvk8yQ5kenFekEaxAhupX9i3YgdfFevm6gvE1"
+  }
+}
